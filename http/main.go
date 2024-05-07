@@ -1,14 +1,42 @@
 package main
 
 import (
-	"github.com/AmirHosseinJalilian/back_hesabdar/services/pepole"
+	// "log"
+	// "github.com/AmirHosseinJalilian/back_hesabdar/services/pepole"
+	// "github.com/gin-gonic/gin"
+	"github.com/AmirHosseinJalilian/back_hesabdar/database"
 	"github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation"
-	"github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation_details"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	// "github.com/rs/cors"
+	// "github.com/AmirHosseinJalilian/back_hesabdar/services/pepole"
+	// "github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation"
+	// "github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation_details"
 )
 
 func main() {
+	// Echo instance
+	e := echo.New()
+	db := database.Connect()
+	// Middleware
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
-	sale_factor_confirmation_details.SaleFactorConfirmationDetails()
-	sale_factor_confirmation.SaleFactorConfirmation()
-	pepole.Pepole()
+	// Routes
+	// e := echo.New()
+	e.GET("/SaleFactorConfirmations", sale_factor_confirmation.GetSaleFactorConfirmations(db))
+	e.Start(":8080")
+	// log.Fatal(http.ListenAndServe(serverPort, router))
+
+	// 	mux := http.NewServeMux()
+	// 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	// 		w.Header().Set("Content-Type", "application/json")
+	// 		w.Write([]byte("{\"hello\": \"world\"}"))
+	// 	})
+
+	// 	// cors.Default() setup the middleware with default options being
+	// 	// all origins accepted with simple methods (GET, POST). See
+	// 	// documentation below for more options.
+	// 	handler := cors.Default().Handler(mux)
+	// 	http.ListenAndServe(":8080", handler)
 }
