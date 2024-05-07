@@ -20,7 +20,7 @@ type SaleFactorConfirmation struct {
 
 func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	// db := database.Connect()
-
+	//fasjklhd
 	query := "SELECT id, dateFactorSale, factorNumber, saleType FROM SaleFactorConfirmation"
 	rows, err := db.Query(query)
 	if err != nil {
