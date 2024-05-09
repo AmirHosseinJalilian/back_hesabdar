@@ -6,6 +6,7 @@ import (
 	// "github.com/gin-gonic/gin"
 	"github.com/AmirHosseinJalilian/back_hesabdar/database"
 	"github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation"
+	"github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation_details"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	// "github.com/rs/cors"
@@ -17,14 +18,22 @@ import (
 func main() {
 	// Echo instance
 	e := echo.New()
-	db := database.Connect()
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	// Connect to the database
+	db := database.Connect()
+	// Remember to defer closing the database connection until application stops
+	defer db.Close()
 	// Routes
-	// e := echo.New()
-	e.GET("/SaleFactorConfirmations", sale_factor_confirmation.GetSaleFactorConfirmations(db))
+	// Define routes
+	e.GET("/SaleFactorConfirmations", func(c echo.Context) error {
+		return sale_factor_confirmation.GetSaleFactorConfirmations(c, db)
+	})
+	e.GET("/SaleFactorConfirmationDetails", func(c echo.Context) error {
+		return sale_factor_confirmation_details.GetSaleFactorConfirmationDetails(c, db)
+	})
 	e.Start(":8080")
 	// log.Fatal(http.ListenAndServe(serverPort, router))
 
