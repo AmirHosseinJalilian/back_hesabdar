@@ -1,18 +1,12 @@
 package main
 
 import (
-	// "log"
-	// "github.com/AmirHosseinJalilian/back_hesabdar/services/pepole"
-	// "github.com/gin-gonic/gin"
 	"github.com/AmirHosseinJalilian/back_hesabdar/database"
+	"github.com/AmirHosseinJalilian/back_hesabdar/services/pepole"
 	"github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation"
 	"github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation_details"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	// "github.com/rs/cors"
-	// "github.com/AmirHosseinJalilian/back_hesabdar/services/pepole"
-	// "github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation"
-	// "github.com/AmirHosseinJalilian/back_hesabdar/services/sale_factor_confirmation_details"
 )
 
 func main() {
@@ -28,6 +22,9 @@ func main() {
 	defer db.Close()
 	// Routes
 	// Define routes
+	e.GET("/Pepoles", func(c echo.Context) error {
+		return pepole.GetPepoles(c, db)
+	})
 	e.GET("/SaleFactorConfirmations", func(c echo.Context) error {
 		return sale_factor_confirmation.GetSaleFactorConfirmations(c, db)
 	})

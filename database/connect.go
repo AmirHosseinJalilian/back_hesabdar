@@ -28,7 +28,7 @@ func Connect() *sql.DB {
 	if err != nil {
 		log.Fatalf("Failed to open connection to SQL Server database: %v", err)
 	}
-	defer db.Close()
+	// defer db.Close()
 
 	// Verify connection
 	if err = db.Ping(); err != nil {
