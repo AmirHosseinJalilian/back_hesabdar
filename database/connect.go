@@ -11,11 +11,12 @@ func Connect() *sql.DB {
 
 	const (
 		driverName = "sqlserver"
-		host       = "192.168.1.18"
-		port       = "7007"
-		user       = "netim"     // Replace with your SQL Server username
-		password   = "smj920123" // Replace with your SQL Server password
-		dbName     = "Mehrad"    // Replace with your SQL Server database name
+		// host       = "192.168.1.18"
+		host     = "192.168.1.100"
+		port     = "7007"
+		user     = "netim"     // Replace with your SQL Server username
+		password = "smj920123" // Replace with your SQL Server password
+		dbName   = "Mehrad"    // Replace with your SQL Server database name
 	)
 
 	var db *sql.DB
