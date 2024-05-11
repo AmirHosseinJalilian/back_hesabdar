@@ -7,12 +7,14 @@ import (
 	"strconv"
 	"time"
 
+	// "github.com/AmirHosseinJalilian/back_hesabdar/custom/convert_date"
 	"github.com/labstack/echo/v4"
 )
 
 // Define a struct for an invoice
 type SaleFactorConfirmation struct {
 	ID             int64     `json:"id"`
+	RowID          string    `json:"rowId"` // Add row ID field
 	DateFactorSale time.Time `json:"dateFactorSale"`
 	FactorNumber   string    `json:"factorNumber"`
 	SaleType       int       `json:"saleType"`
@@ -30,8 +32,9 @@ type QuerySaleFactorConfirmationsResponseType struct {
 	} `json:"data"`
 }
 
+// Modify the GetSaleFactorConfirmations function to handle pagination
 func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
-	// Parse limit, offset, and page from query parameters
+
 	limitStr := c.QueryParam("limit")
 	offsetStr := c.QueryParam("offset")
 	pageStr := c.QueryParam("page")
@@ -71,7 +74,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	totalPages := (totalRows + limit - 1) / limit
 
 	// Execute the query with limit and offset
-	query := "SELECT id, dateFactorSale, factorNumber, saleType FROM SaleFactorConfirmation ORDER BY id OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY"
+	query := "SELECT id, dateFactorSale, factorNumber, saleType FROM SaleFactorConfirmation ORDER BY id DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY"
 	rows, err := db.Query(query, sql.Named("limit", limit), sql.Named("offset", offset))
 	if err != nil {
 		fmt.Println("Error executing query:", err)
@@ -83,7 +86,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 
 	// Parse rows into struct
 	var saleFactorConfirmations []SaleFactorConfirmation
-	for rows.Next() {
+	for i := 0; rows.Next(); i++ {
 		var saleFactorC SaleFactorConfirmation
 		if err := rows.Scan(&saleFactorC.ID, &saleFactorC.DateFactorSale, &saleFactorC.FactorNumber, &saleFactorC.SaleType); err != nil {
 			fmt.Println("Error scanning row:", err)
@@ -91,6 +94,9 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 				"error": fmt.Sprintf("Failed to scan row: %v", err),
 			})
 		}
+		// Generate RowID for each item
+		saleFactorC.RowID = generateRowID(offset + i + 1)
+
 		saleFactorConfirmations = append(saleFactorConfirmations, saleFactorC)
 	}
 
@@ -113,4 +119,9 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	responseData.Data.Items = saleFactorConfirmations
 
 	return c.JSON(http.StatusOK, responseData)
+}
+
+func generateRowID(index int) string {
+	// Concatenate the page number with the index to create a unique row ID
+	return fmt.Sprintf("%d", index)
 }
