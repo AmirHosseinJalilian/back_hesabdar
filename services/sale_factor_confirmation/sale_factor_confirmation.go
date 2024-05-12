@@ -13,11 +13,15 @@ import (
 
 // Define a struct for an invoice
 type SaleFactorConfirmation struct {
-	ID             int64     `json:"id"`
-	RowID          string    `json:"rowId"` // Add row ID field
-	DateFactorSale time.Time `json:"dateFactorSale"`
-	FactorNumber   string    `json:"factorNumber"`
-	SaleType       int       `json:"saleType"`
+	ID               int64     `json:"id"`
+	RowID            string    `json:"rowId"` // Add row ID field
+	DateFactorSale   time.Time `json:"dateFactorSale"`
+	FactorNumber     string    `json:"factorNumber"`
+	SaleType         int       `json:"saleType"`
+	PepoleGroupingID int64     `json:"pepoleGroupingId"` // Add PepoleGroupingID field
+	ObjectValue      string    `json:"objectValue"`
+	Name             string    `json:"name"`
+	NationalityCode  string    `json:"nationalityCode"`
 }
 
 type QuerySaleFactorConfirmationsResponseType struct {
@@ -74,7 +78,13 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	totalPages := (totalRows + limit - 1) / limit
 
 	// Execute the query with limit and offset
-	query := "SELECT id, dateFactorSale, factorNumber, saleType FROM SaleFactorConfirmation ORDER BY id DESC OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY"
+	query := `SELECT sfc.id, sfc.dateFactorSale, sfc.factorNumber, sfc.saleType,sfc.PepoleGroupingID, g.ObjectValue, p.name,pd.nationalityCode
+	FROM SaleFactorConfirmation sfc
+	INNER JOIN Grouping g ON sfc.PepoleGroupingID = g.ID
+	INNER JOIN Pepole p ON g.ID = p.ID
+	INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
+	ORDER BY sfc.id DESC
+	OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`
 	rows, err := db.Query(query, sql.Named("limit", limit), sql.Named("offset", offset))
 	if err != nil {
 		fmt.Println("Error executing query:", err)
@@ -88,7 +98,8 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	var saleFactorConfirmations []SaleFactorConfirmation
 	for i := 0; rows.Next(); i++ {
 		var saleFactorC SaleFactorConfirmation
-		if err := rows.Scan(&saleFactorC.ID, &saleFactorC.DateFactorSale, &saleFactorC.FactorNumber, &saleFactorC.SaleType); err != nil {
+		if err := rows.Scan(&saleFactorC.ID, &saleFactorC.DateFactorSale, &saleFactorC.FactorNumber, &saleFactorC.SaleType,
+			&saleFactorC.PepoleGroupingID, &saleFactorC.ObjectValue, &saleFactorC.Name, &saleFactorC.NationalityCode); err != nil {
 			fmt.Println("Error scanning row:", err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("Failed to scan row: %v", err),
