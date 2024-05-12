@@ -19,12 +19,19 @@ type saleFactorConfirmationDetail struct {
 	CommodityDiscount        float64 `json:"commodityDiscount"`
 	ISCommodityDiscount      bool    `json:"iSCommodityDiscount"`
 	Vat                      float64 `json:"vat"`
+	ComodityCod              string  `json:"comodityCod"`
+	CommodityName            string  `json:"commodityName"`
+	UnitCount                int64   `json:"unitCount"`
+	BasePrice                int64   `json:"basePrice"`
 }
 
 // SQL Server connection parameters
 
 func GetSaleFactorConfirmationDetails(c echo.Context, db *sql.DB) error {
-	query := "SELECT id, saleFactorConfirmationID, commodity, count, unitCost, commodityDiscount, iSCommodityDiscount, vat FROM SaleFactorConfirmationDetails"
+	query := `SELECT sfcd.id, sfcd.saleFactorConfirmationID, sfcd.commodity, sfcd.count, sfcd.unitCost, sfcd.commodityDiscount,
+	sfcd.iSCommodityDiscount, sfcd.vat, c.comodityCod, c.commodityName, c.unitCount, c.basePrice
+	FROM SaleFactorConfirmationDetails sfcd
+	INNER JOIN Commoditym c ON c.id = sfcd.commodity`
 	rows, err := db.Query(query)
 	if err != nil {
 		// Log the error for debugging
@@ -39,7 +46,8 @@ func GetSaleFactorConfirmationDetails(c echo.Context, db *sql.DB) error {
 	for rows.Next() {
 		var saleFactorCD saleFactorConfirmationDetail
 		if err := rows.Scan(&saleFactorCD.ID, &saleFactorCD.SaleFactorConfirmationID, &saleFactorCD.Commodity, &saleFactorCD.Count,
-			&saleFactorCD.UnitCost, &saleFactorCD.CommodityDiscount, &saleFactorCD.ISCommodityDiscount, &saleFactorCD.Vat); err != nil {
+			&saleFactorCD.UnitCost, &saleFactorCD.CommodityDiscount, &saleFactorCD.ISCommodityDiscount, &saleFactorCD.Vat,
+			&saleFactorCD.ComodityCod, &saleFactorCD.CommodityName, &saleFactorCD.UnitCount, &saleFactorCD.BasePrice); err != nil {
 			fmt.Println("Error scanning row:", err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("Failed to scan row: %v", err),

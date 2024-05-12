@@ -13,15 +13,29 @@ import (
 
 // Define a struct for an invoice
 type SaleFactorConfirmation struct {
-	ID               int64     `json:"id"`
-	RowID            string    `json:"rowId"` // Add row ID field
-	DateFactorSale   time.Time `json:"dateFactorSale"`
-	FactorNumber     string    `json:"factorNumber"`
-	SaleType         int       `json:"saleType"`
-	PepoleGroupingID int64     `json:"pepoleGroupingId"` // Add PepoleGroupingID field
-	ObjectValue      string    `json:"objectValue"`
-	Name             string    `json:"name"`
-	NationalityCode  string    `json:"nationalityCode"`
+	ID                       int64     `json:"id"`
+	RowID                    string    `json:"rowId"` // Add row ID field
+	DateFactorSale           time.Time `json:"dateFactorSale"`
+	FactorNumber             string    `json:"factorNumber"`
+	SaleType                 int       `json:"saleType"`
+	PepoleGroupingID         int64     `json:"pepoleGroupingId"` // Add PepoleGroupingID field
+	ObjectValue              string    `json:"objectValue"`
+	Name                     string    `json:"name"`
+	NationalityCode          string    `json:"nationalityCode"`
+	SaleFactorConfirmationID int64     `json:"saleFactorConfirmationID"`
+	Commodity                int64     `json:"commodity"`
+	Count                    float64   `json:"count"`
+	UnitCost                 float64   `json:"unitCost"`
+	CommodityDiscount        float64   `json:"commodityDiscount"`
+	ISCommodityDiscount      bool      `json:"iSCommodityDiscount"`
+	Vat                      float64   `json:"vat"`
+	ComodityCod              string    `json:"comodityCod"`
+	CommodityName            string    `json:"commodityName"`
+	UnitCount                int64     `json:"unitCount"`
+	BasePrice                int64     `json:"basePrice"`
+	Phone                    string    `json:"phone"`
+	Address                  string    `json:"address"`
+	PepoleType               int16     `json:"pepoleType"`
 }
 
 type QuerySaleFactorConfirmationsResponseType struct {
@@ -78,8 +92,12 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	totalPages := (totalRows + limit - 1) / limit
 
 	// Execute the query with limit and offset
-	query := `SELECT sfc.id, sfc.dateFactorSale, sfc.factorNumber, sfc.saleType,sfc.PepoleGroupingID, g.ObjectValue, p.name,pd.nationalityCode
+	query := `SELECT sfc.id, sfc.dateFactorSale, sfc.factorNumber, sfc.saleType,sfc.PepoleGroupingID, g.ObjectValue, p.name,pd.nationalityCode,
+	sfcd.saleFactorConfirmationID, sfcd.commodity, sfcd.count, sfcd.unitCost, sfcd.commodityDiscount,sfcd.iSCommodityDiscount ,
+	sfcd.vat, c.comodityCod, c.commodityName, c.unitCount, c.basePrice, pd.phone, pd.address, p.pepoleType
 	FROM SaleFactorConfirmation sfc
+	INNER JOIN SaleFactorConfirmationDetails sfcd ON sfc.ID = sfcd.SaleFactorConfirmationID
+	INNER JOIN Commoditym c ON c.id = sfcd.commodity
 	INNER JOIN Grouping g ON sfc.PepoleGroupingID = g.ID
 	INNER JOIN Pepole p ON g.ID = p.ID
 	INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
@@ -99,7 +117,11 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	for i := 0; rows.Next(); i++ {
 		var saleFactorC SaleFactorConfirmation
 		if err := rows.Scan(&saleFactorC.ID, &saleFactorC.DateFactorSale, &saleFactorC.FactorNumber, &saleFactorC.SaleType,
-			&saleFactorC.PepoleGroupingID, &saleFactorC.ObjectValue, &saleFactorC.Name, &saleFactorC.NationalityCode); err != nil {
+			&saleFactorC.PepoleGroupingID, &saleFactorC.ObjectValue, &saleFactorC.Name, &saleFactorC.NationalityCode,
+			&saleFactorC.SaleFactorConfirmationID, &saleFactorC.Commodity, &saleFactorC.Count, &saleFactorC.UnitCost,
+			&saleFactorC.CommodityDiscount, &saleFactorC.ISCommodityDiscount, &saleFactorC.Vat, &saleFactorC.ComodityCod,
+			&saleFactorC.CommodityName, &saleFactorC.UnitCount, &saleFactorC.BasePrice, &saleFactorC.Phone,
+			&saleFactorC.Address, &saleFactorC.PepoleType); err != nil {
 			fmt.Println("Error scanning row:", err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("Failed to scan row: %v", err),
