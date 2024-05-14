@@ -8,6 +8,7 @@ import (
 	"time"
 
 	// "github.com/AmirHosseinJalilian/back_hesabdar/custom/convert_date"
+	// "github.com/hoitek-go/govalidity"
 	"github.com/labstack/echo/v4"
 )
 
@@ -37,6 +38,14 @@ type SaleFactorConfirmation struct {
 	Address                  string    `json:"address"`
 	PepoleType               int16     `json:"pepoleType"`
 }
+
+// type ProductQueryRequestParams struct {
+// 	ID      string                 `json:"id,omitempty"`
+// 	Order   string                 `json:"order,omitempty"`
+// 	OrderBy string                 `json:"order_by,omitempty"`
+// 	Query   string                 `json:"query,omitempty"`
+// 	Filters SaleFactorConfirmation `json:"filters,omitempty"`
+// }
 
 type QuerySaleFactorConfirmationsResponseType struct {
 	StatusCode int `json:"statusCode"`
@@ -102,7 +111,8 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	INNER JOIN Pepole p ON g.ID = p.ID
 	INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
 	ORDER BY sfc.id DESC
-	OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`
+	OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
+	WHERE sfc.id = @id`
 	rows, err := db.Query(query, sql.Named("limit", limit), sql.Named("offset", offset))
 	if err != nil {
 		fmt.Println("Error executing query:", err)

@@ -28,6 +28,7 @@ require (
 	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/uuid v1.6.0
+	github.com/hoitek-go/govalidity v1.2.9
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/rs/cors v1.11.0
 	golang.org/x/crypto v0.22.0 // indirect

@@ -28,9 +28,15 @@ func main() {
 	e.GET("/Pepoles", func(c echo.Context) error {
 		return pepole.GetPepoles(c, db)
 	})
+
 	e.GET("/SaleFactorConfirmations", func(c echo.Context) error {
 		return sale_factor_confirmation.GetSaleFactorConfirmations(c, db)
 	})
+
+	e.GET("/SaleFactorConfirmation/:id/edit", func(c echo.Context) error {
+		return sale_factor_confirmation.GetSaleFactorConfirmationByID(c, db)
+	})
+
 	e.GET("/SaleFactorConfirmationDetails", func(c echo.Context) error {
 		return sale_factor_confirmation_details.GetSaleFactorConfirmationDetails(c, db)
 	})
