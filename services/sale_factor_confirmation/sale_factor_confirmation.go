@@ -65,6 +65,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	limitStr := c.QueryParam("limit")
 	offsetStr := c.QueryParam("offset")
 	pageStr := c.QueryParam("page")
+	idStr := c.QueryParam("id")
 
 	// Convert query parameters to integers
 	limit, err := strconv.Atoi(limitStr)
@@ -87,6 +88,10 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 		offset = (page - 1) * limit
 	}
 
+	id, err := strconv.Atoi(offsetStr)
+	if err != nil {
+		id = -1 // Default offset
+	}
 	// Fetch total rows
 	var totalRows int
 	err = db.QueryRow("SELECT COUNT(*) FROM SaleFactorConfirmation").Scan(&totalRows)
@@ -112,7 +117,8 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
 	ORDER BY sfc.id DESC
 	OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
-	WHERE sfc.id = @id`
+	
+	`
 	rows, err := db.Query(query, sql.Named("limit", limit), sql.Named("offset", offset))
 	if err != nil {
 		fmt.Println("Error executing query:", err)
