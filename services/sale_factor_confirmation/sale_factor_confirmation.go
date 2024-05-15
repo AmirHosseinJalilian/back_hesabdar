@@ -88,13 +88,18 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 		offset = (page - 1) * limit
 	}
 
-	id, err := strconv.Atoi(offsetStr)
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		id = -1 // Default offset
 	}
 	// Fetch total rows
+
 	var totalRows int
-	err = db.QueryRow("SELECT COUNT(*) FROM SaleFactorConfirmation").Scan(&totalRows)
+	queryTotal := "SELECT COUNT(*) FROM SaleFactorConfirmation"
+	if id != -1 {
+		queryTotal += " WHERE id = @id"
+	}
+	err = db.QueryRow(queryTotal, sql.Named("id", id)).Scan(&totalRows)
 	if err != nil {
 		fmt.Println("Error fetching total rows:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -115,11 +120,22 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	INNER JOIN Grouping g ON sfc.PepoleGroupingID = g.ID
 	INNER JOIN Pepole p ON g.ID = p.ID
 	INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
+	WHERE (@id = -1 OR sfc.id = @id)
 	ORDER BY sfc.id DESC
-	OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
-	
-	`
-	rows, err := db.Query(query, sql.Named("limit", limit), sql.Named("offset", offset))
+	OFFSET @offset ROWS
+	FETCH NEXT @limit ROWS ONLY`
+
+	// Prepare the query statement
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		fmt.Println("Error preparing query:", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": fmt.Sprintf("Failed to prepare query: %v", err),
+		})
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(sql.Named("limit", limit), sql.Named("offset", offset), sql.Named("id", id))
 	if err != nil {
 		fmt.Println("Error executing query:", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
@@ -143,6 +159,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 				"error": fmt.Sprintf("Failed to scan row: %v", err),
 			})
 		}
+
 		// Generate RowID for each item
 		saleFactorC.RowID = generateRowID(offset + i + 1)
 
