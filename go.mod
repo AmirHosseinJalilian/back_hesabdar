@@ -33,4 +33,5 @@ require (
 	github.com/rs/cors v1.11.0
 	golang.org/x/crypto v0.22.0 // indirect
 	gorm.io/gorm v1.25.10
+	gorm.io/plugin/soft_delete v1.2.1
 )

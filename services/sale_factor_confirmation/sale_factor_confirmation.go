@@ -9,34 +9,35 @@ import (
 
 	// "github.com/AmirHosseinJalilian/back_hesabdar/custom/convert_date"
 	// "github.com/hoitek-go/govalidity"
+	"github.com/AmirHosseinJalilian/back_hesabdar/services/commodity"
 	"github.com/labstack/echo/v4"
 )
 
 // Define a struct for an invoice
 type SaleFactorConfirmation struct {
-	ID                       int64     `json:"id"`
-	RowID                    string    `json:"rowId"` // Add row ID field
-	DateFactorSale           time.Time `json:"dateFactorSale"`
-	FactorNumber             string    `json:"factorNumber"`
-	SaleType                 int       `json:"saleType"`
-	PepoleGroupingID         int64     `json:"pepoleGroupingId"` // Add PepoleGroupingID field
-	ObjectValue              string    `json:"objectValue"`
-	Name                     string    `json:"name"`
-	NationalityCode          string    `json:"nationalityCode"`
-	SaleFactorConfirmationID int64     `json:"saleFactorConfirmationID"`
-	Commodity                int64     `json:"commodity"`
-	Count                    float64   `json:"count"`
-	UnitCost                 float64   `json:"unitCost"`
-	CommodityDiscount        float64   `json:"commodityDiscount"`
-	ISCommodityDiscount      bool      `json:"iSCommodityDiscount"`
-	Vat                      float64   `json:"vat"`
-	ComodityCod              string    `json:"comodityCod"`
-	CommodityName            string    `json:"commodityName"`
-	UnitCount                int64     `json:"unitCount"`
-	BasePrice                int64     `json:"basePrice"`
-	Phone                    string    `json:"phone"`
-	Address                  string    `json:"address"`
-	PepoleType               int16     `json:"pepoleType"`
+	ID                       int64                  `json:"id"`
+	RowID                    string                 `json:"rowId"` // Add row ID field
+	DateFactorSale           time.Time              `json:"dateFactorSale"`
+	FactorNumber             string                 `json:"factorNumber"`
+	SaleType                 int                    `json:"saleType"`
+	PepoleGroupingID         int64                  `json:"pepoleGroupingId"` // Add PepoleGroupingID field
+	ObjectValue              string                 `json:"objectValue"`
+	Name                     string                 `json:"name"`
+	NationalityCode          string                 `json:"nationalityCode"`
+	SaleFactorConfirmationID int64                  `json:"saleFactorConfirmationID"`
+	Commoditys               []*commodity.Commodity `json:"Commoditys" gorm:"many2many:sale_factor_confirmation_commodities;"`
+	Count                    float64                `json:"count"`
+	UnitCost                 float64                `json:"unitCost"`
+	CommodityDiscount        float64                `json:"commodityDiscount"`
+	ISCommodityDiscount      bool                   `json:"iSCommodityDiscount"`
+	Vat                      float64                `json:"vat"`
+	Phone                    string                 `json:"phone"`
+	Address                  string                 `json:"address"`
+	PepoleType               int16                  `json:"pepoleType"`
+	// ComodityCod              string                   `json:"comodityCod"`
+	// CommodityName            string                   `json:"commodityName"`
+	// UnitCount                int64                    `json:"unitCount"`
+	// BasePrice                int64                    `json:"basePrice"`
 }
 
 // type ProductQueryRequestParams struct {
@@ -109,21 +110,22 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 
 	// Calculate total pages
 	totalPages := (totalRows + limit - 1) / limit
+	// sfcd.vat, c.comodityCod, c.commodityName, c.unitCount, c.basePrice, pd.phone, pd.address, p.pepoleType
 
 	// Execute the query with limit and offset
-	query := `SELECT sfc.id, sfc.dateFactorSale, sfc.factorNumber, sfc.saleType,sfc.PepoleGroupingID, g.ObjectValue, p.name,pd.nationalityCode,
-	sfcd.saleFactorConfirmationID, sfcd.commodity, sfcd.count, sfcd.unitCost, sfcd.commodityDiscount,sfcd.iSCommodityDiscount ,
-	sfcd.vat, c.comodityCod, c.commodityName, c.unitCount, c.basePrice, pd.phone, pd.address, p.pepoleType
-	FROM SaleFactorConfirmation sfc
-	INNER JOIN SaleFactorConfirmationDetails sfcd ON sfc.ID = sfcd.SaleFactorConfirmationID
-	INNER JOIN Commoditym c ON c.id = sfcd.commodity
-	INNER JOIN Grouping g ON sfc.PepoleGroupingID = g.ID
-	INNER JOIN Pepole p ON g.ID = p.ID
-	INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
-	WHERE (@id = -1 OR sfc.id = @id)
-	ORDER BY sfc.id DESC
-	OFFSET @offset ROWS
-	FETCH NEXT @limit ROWS ONLY`
+	query := `SELECT sfc.id, sfc.dateFactorSale, sfc.factorNumber, sfc.saleType, sfc.PepoleGroupingID, g.ObjectValue, p.name, pd.nationalityCode,
+    sfcd.saleFactorConfirmationID, c.ID, c.comodityCod, c.commodityName, c.unitCount, c.basePrice,
+    sfcd.count, sfcd.unitCost, sfcd.commodityDiscount, sfcd.iSCommodityDiscount, sfcd.vat, pd.phone, pd.address, p.pepoleType
+FROM SaleFactorConfirmation sfc
+INNER JOIN SaleFactorConfirmationDetails sfcd ON sfc.ID = sfcd.SaleFactorConfirmationID
+INNER JOIN Grouping g ON sfc.PepoleGroupingID = g.ID
+INNER JOIN Pepole p ON g.ID = p.ID
+INNER JOIN PepoleDescription pd ON p.ID = pd.PepoleID
+INNER JOIN commoditym c ON sfcd.Commodity = c.ID  -- Assuming there's a column named 'Commodity' in SaleFactorConfirmationDetails
+WHERE (@id = -1 OR sfc.id = @id)
+ORDER BY sfc.id DESC
+OFFSET @offset ROWS
+FETCH NEXT @limit ROWS ONLY`
 
 	// Prepare the query statement
 	stmt, err := db.Prepare(query)
@@ -148,18 +150,19 @@ func GetSaleFactorConfirmations(c echo.Context, db *sql.DB) error {
 	var saleFactorConfirmations []SaleFactorConfirmation
 	for i := 0; rows.Next(); i++ {
 		var saleFactorC SaleFactorConfirmation
+		var commodityID uint
+		var commodityCod, commodityName, unitCount string
+		var basePrice int64
 		if err := rows.Scan(&saleFactorC.ID, &saleFactorC.DateFactorSale, &saleFactorC.FactorNumber, &saleFactorC.SaleType,
 			&saleFactorC.PepoleGroupingID, &saleFactorC.ObjectValue, &saleFactorC.Name, &saleFactorC.NationalityCode,
-			&saleFactorC.SaleFactorConfirmationID, &saleFactorC.Commodity, &saleFactorC.Count, &saleFactorC.UnitCost,
-			&saleFactorC.CommodityDiscount, &saleFactorC.ISCommodityDiscount, &saleFactorC.Vat, &saleFactorC.ComodityCod,
-			&saleFactorC.CommodityName, &saleFactorC.UnitCount, &saleFactorC.BasePrice, &saleFactorC.Phone,
-			&saleFactorC.Address, &saleFactorC.PepoleType); err != nil {
+			&saleFactorC.SaleFactorConfirmationID, &commodityID, &commodityCod, &commodityName, &unitCount, &basePrice,
+			&saleFactorC.Count, &saleFactorC.UnitCost, &saleFactorC.CommodityDiscount, &saleFactorC.ISCommodityDiscount,
+			&saleFactorC.Vat, &saleFactorC.Phone, &saleFactorC.Address, &saleFactorC.PepoleType); err != nil {
 			fmt.Println("Error scanning row:", err)
 			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"error": fmt.Sprintf("Failed to scan row: %v", err),
 			})
 		}
-
 		// Generate RowID for each item
 		saleFactorC.RowID = generateRowID(offset + i + 1)
 
