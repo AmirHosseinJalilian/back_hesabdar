@@ -25,7 +25,7 @@ type SaleFactorConfirmation struct {
 	Name                     string                 `json:"name"`
 	NationalityCode          string                 `json:"nationalityCode"`
 	SaleFactorConfirmationID int64                  `json:"saleFactorConfirmationID"`
-	Commoditys               []*commodity.Commodity `json:"Commoditys" gorm:"many2many:sale_factor_confirmation_commodities;"`
+	Commoditys               []*commodity.Commodity `json:"Commoditys" gorm:"many2many:sale_factor_confirmation_commodities;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Count                    float64                `json:"count"`
 	UnitCost                 float64                `json:"unitCost"`
 	CommodityDiscount        float64                `json:"commodityDiscount"`
