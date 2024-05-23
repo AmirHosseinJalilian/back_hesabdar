@@ -29,7 +29,7 @@ func main() {
 	defer sqlDB.Close()
 
 	// Auto migrate the models
-	db.AutoMigrate(&models.SaleFactorConfirmation{}, &models.SaleFactorConfirmationDetails{}, &models.Commodity{}, &models.Grouping{}, &models.Pepole{}, &models.PepoleDescription{})
+	db.AutoMigrate(&models.SaleFactorConfirmation{}, &models.SaleFactorConfirmationDetails{}, &models.Commoditym{}, &models.Grouping{}, &models.Pepole{}, &models.PepoleDescription{})
 
 	// Define routes
 	e.GET("/SaleFactorConfirmations", func(c echo.Context) error {

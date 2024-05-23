@@ -7,3 +7,7 @@ type PepoleDescription struct {
 	Phone           string `json:"phone" gorm:"column:Phone"`
 	NationalityCode string `json:"nationalityCode" gorm:"column:NationalityCode"`
 }
+
+func (PepoleDescription) TableName() string {
+	return "PepoleDescription"
+}

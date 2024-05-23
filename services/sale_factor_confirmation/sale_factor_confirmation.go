@@ -53,8 +53,10 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 	var totalRows int64
 
 	query := db.Model(&models.SaleFactorConfirmation{}).
-		Preload("Details.Commodity").
-		Preload("Grouping.Pepole.Descriptions")
+		Preload("Details.Commodity").                        // Preload Commodity in Details
+		Preload("PepoleGrouping").                           // Preload PepoleGrouping
+		Preload("PepoleGrouping.Pepoles").                   // Preload Pepoles in PepoleGrouping
+		Preload("PepoleGrouping.Pepoles.PepoleDescriptions") // Preload PepoleDescriptions in Pepoles
 
 	if idStr != "" {
 		var id int64
