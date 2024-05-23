@@ -1,7 +1,7 @@
 package models
 
 type PepoleDescription struct {
-	ID              int64  `gorm:"primaryKey;column:ID"`
+	ID              int64  `json:"id" gorm:"primaryKey;column:ID"`
 	PepoleID        int64  `json:"pepoleID" gorm:"column:PepoleID"`
 	Address         string `json:"address" gorm:"column:Address"`
 	Phone           string `json:"phone" gorm:"column:Phone"`

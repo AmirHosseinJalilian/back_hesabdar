@@ -31,7 +31,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		limit = 10 // Default limit
+		limit = 100000000000000 // Default limit
 	}
 
 	offset, err := strconv.Atoi(offsetStr)

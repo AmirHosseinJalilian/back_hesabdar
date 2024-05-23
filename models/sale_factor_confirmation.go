@@ -12,7 +12,7 @@ type SaleFactorConfirmation struct {
 	SaleType         int                           `json:"saleType" gorm:"column:SaleType"`
 	PepoleGroupingID int                           `json:"pepoleGroupingID" gorm:"column:PepoleGroupingID"`
 	Details          SaleFactorConfirmationDetails `gorm:"foreignKey:SaleFactorConfirmationID"`
-	PepoleGrouping   Grouping                      `gorm:"foreignKey:ID"`
+	PepoleGrouping   Grouping                      `json:"pepoleGrouping" gorm:"foreignKey:ID"`
 }
 
 func (SaleFactorConfirmation) TableName() string {

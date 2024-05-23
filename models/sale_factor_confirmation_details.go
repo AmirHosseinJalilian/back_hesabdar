@@ -9,7 +9,7 @@ type SaleFactorConfirmationDetails struct {
 	ISCommodityDiscount      string     `json:"iSCommodityDiscount" gorm:"column:ISCommodityDiscount"`
 	Vat                      string     `json:"vat" gorm:"column:Vat"`
 	CommodityID              int64      `json:"commodityID" gorm:"column:Commodity"`
-	Commodity                Commoditym `gorm:"foreignKey:CommodityID"`
+	Commodity                Commoditym `json:"commodity" gorm:"foreignKey:CommodityID"`
 }
 
 func (SaleFactorConfirmationDetails) TableName() string {
