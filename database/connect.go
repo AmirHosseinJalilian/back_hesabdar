@@ -10,7 +10,7 @@ import (
 
 func Connect() *gorm.DB {
 	const (
-		host     = "192.168.1.18"
+		host     = "192.168.1.109"
 		port     = "7007"
 		user     = "netim"     // Replace with your SQL Server username
 		password = "smj920123" // Replace with your SQL Server password
