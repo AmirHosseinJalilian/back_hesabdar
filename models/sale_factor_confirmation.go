@@ -4,17 +4,56 @@ import (
 	"time"
 )
 
-type SaleFactorConfirmation struct {
-	ID               int64                           `json:"id" gorm:"primaryKey;column:ID"`
-	RowID            string                          `json:"rowId"`
-	DateFactorSale   time.Time                       `json:"dateFactorSale" gorm:"column:DateFactorSale"`
-	FactorNumber     string                          `json:"factorNumber" gorm:"column:FactorNumber"`
-	SaleType         int                             `json:"saleType" gorm:"column:SaleType"`
-	PepoleGroupingID int                             `json:"pepoleGroupingID" gorm:"column:PepoleGroupingID"`
-	Details          []SaleFactorConfirmationDetails `gorm:"foreignKey:SaleFactorConfirmationID"`
-	PepoleGrouping   Grouping                        `gorm:"foreignKey:ID"`
+type CustomSaleFactorConfirmation struct {
+	ID               int64                                `json:"id"`
+	RowID            string                               `json:"rowId"`
+	DateFactorSale   time.Time                            `json:"dateFactorSale"`
+	FactorNumber     string                               `json:"factorNumber"`
+	SaleType         int                                  `json:"saleType"`
+	PepoleGroupingID int                                  `json:"pepoleGroupingID"`
+	Details          []CustomSaleFactorConfirmationDetail `json:"details"`
+	PepoleGrouping   CustomPepoleGrouping                 `json:"pepoleGrouping"`
 }
 
-func (SaleFactorConfirmation) TableName() string {
-	return "SaleFactorConfirmation"
+type CustomSaleFactorConfirmationDetail struct {
+	ID                       int64           `json:"id"`
+	SaleFactorConfirmationID int64           `json:"saleFactorConfirmationID"`
+	Count                    float64         `json:"count"`
+	UnitCost                 float64         `json:"unitCost"`
+	CommodityDiscount        float64         `json:"commodityDiscount"`
+	ISCommodityDiscount      bool            `json:"iSCommodityDiscount"`
+	Vat                      float64         `json:"vat"`
+	CommodityID              float64         `json:"commodityID"`
+	Commodity                CustomCommodity `json:"commodity"`
+}
+
+type CustomCommodity struct {
+	ID            int64  `json:"id"`
+	ComodityCod   string `json:"comodityCod"`
+	CommodityName string `json:"commodityName"`
+	UnitCount     int64  `json:"unitCount"`
+	BasePrice     int64  `json:"basePrice"`
+}
+
+type CustomPepoleGrouping struct {
+	ID          int64          `json:"id"`
+	ObjectValue string         `json:"objectValue"`
+	Pepoles     []CustomPepole `json:"pepoles"`
+}
+
+type CustomPepole struct {
+	ID                 int64                     `json:"id"`
+	Name               string                    `json:"name"`
+	PepoleType         uint8                     `json:"pepoleType"`
+	CodPepole          string                    `json:"codPepole"`
+	GroupingID         uint                      `json:"groupingID"`
+	PepoleDescriptions []CustomPepoleDescription `json:"pepoleDescriptions"`
+}
+
+type CustomPepoleDescription struct {
+	ID              int64  `json:"id"`
+	PepoleID        int64  `json:"pepoleID"`
+	Address         string `json:"address"`
+	Phone           string `json:"phone"`
+	NationalityCode string `json:"nationalityCode"`
 }
