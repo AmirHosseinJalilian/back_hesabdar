@@ -53,6 +53,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 	}
 
 	var saleFactorConfirmations []models.SaleFactorConfirmation
+	var SaleFactorConfirmationDetails []models.CustomSaleFactorConfirmationDetail
 	var totalRows int64
 
 	query := db.Model(&models.SaleFactorConfirmation{}).
@@ -83,6 +84,10 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 		saleFactorConfirmations[i].RowID = generateRowID(offset + i + 1)
 	}
 
+	for i := range SaleFactorConfirmationDetails {
+		SaleFactorConfirmationDetails[i].DRowID = generateRowID(offset + i + 1)
+	}
+
 	// Transform data into custom response struct
 	var customSaleFactorConfirmations []models.CustomSaleFactorConfirmation
 	for _, saleFactor := range saleFactorConfirmations {
@@ -90,6 +95,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 		for _, detail := range saleFactor.Details {
 			customDetails = append(customDetails, models.CustomSaleFactorConfirmationDetail{
 				ID:                       detail.ID,
+				DRowID:                   detail.DRowID,
 				SaleFactorConfirmationID: detail.SaleFactorConfirmationID,
 				Count:                    detail.Count,
 				UnitCost:                 detail.UnitCost,

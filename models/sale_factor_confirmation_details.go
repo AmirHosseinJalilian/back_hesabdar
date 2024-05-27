@@ -3,6 +3,7 @@ package models
 import "time"
 
 type SaleFactorConfirmationDetails struct {
+	DRowID                   string     `json:"drowId"`
 	ID                       int64      `json:"id" gorm:"primaryKey;column:ID"`
 	SaleFactorConfirmationID int64      `json:"saleFactorConfirmationID" gorm:"column:SaleFactorConfirmationID"`
 	Count                    float64    `json:"count" gorm:"column:Count"`

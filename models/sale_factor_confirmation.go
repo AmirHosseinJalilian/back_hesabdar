@@ -16,6 +16,7 @@ type CustomSaleFactorConfirmation struct {
 }
 
 type CustomSaleFactorConfirmationDetail struct {
+	DRowID                   string          `json:"drowId"`
 	ID                       int64           `json:"id"`
 	SaleFactorConfirmationID int64           `json:"saleFactorConfirmationID"`
 	Count                    float64         `json:"count"`
