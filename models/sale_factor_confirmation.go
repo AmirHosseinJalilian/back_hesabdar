@@ -5,8 +5,8 @@ import (
 )
 
 type CustomSaleFactorConfirmation struct {
-	ID               int64                                `json:"id"`
-	RowID            string                               `json:"rowId"`
+	ID int64 `json:"id"`
+	// RowID            string                               `json:"rowId"`
 	DateFactorSale   time.Time                            `json:"dateFactorSale"`
 	FactorNumber     string                               `json:"factorNumber"`
 	SaleType         int                                  `json:"saleType"`
@@ -16,7 +16,7 @@ type CustomSaleFactorConfirmation struct {
 }
 
 type CustomSaleFactorConfirmationDetail struct {
-	DRowID                   string          `json:"drowId"`
+	// DRowID                   string          `json:"drowId"`
 	ID                       int64           `json:"id"`
 	SaleFactorConfirmationID int64           `json:"saleFactorConfirmationID"`
 	Count                    float64         `json:"count"`

@@ -22,9 +22,9 @@ type QuerySaleFactorConfirmationsResponseType struct {
 	} `json:"data"`
 }
 
-func generateRowID(index int) string {
-	return fmt.Sprintf("%d", index)
-}
+// func generateRowID(index int) string {
+// 	return fmt.Sprintf("%d", index)
+// }
 
 func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 	limitStr := c.QueryParam("limit")
@@ -53,7 +53,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 	}
 
 	var saleFactorConfirmations []models.SaleFactorConfirmation
-	var SaleFactorConfirmationDetails []models.CustomSaleFactorConfirmationDetail
+	// var SaleFactorConfirmationDetails []models.CustomSaleFactorConfirmationDetail
 	var totalRows int64
 
 	query := db.Model(&models.SaleFactorConfirmation{}).
@@ -80,13 +80,13 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 	// Calculate total pages
 	totalPages := (int(totalRows) + limit - 1) / limit
 
-	for i := range saleFactorConfirmations {
-		saleFactorConfirmations[i].RowID = generateRowID(offset + i + 1)
-	}
+	// for i := range saleFactorConfirmations {
+	// 	saleFactorConfirmations[i].RowID = generateRowID(offset + i + 1)
+	// }
 
-	for i := range SaleFactorConfirmationDetails {
-		SaleFactorConfirmationDetails[i].DRowID = generateRowID(offset + i + 1)
-	}
+	// for i := range SaleFactorConfirmationDetails {
+	// 	SaleFactorConfirmationDetails[i].DRowID = generateRowID(offset + i + 1)
+	// }
 
 	// Transform data into custom response struct
 	var customSaleFactorConfirmations []models.CustomSaleFactorConfirmation
@@ -94,8 +94,8 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 		var customDetails []models.CustomSaleFactorConfirmationDetail
 		for _, detail := range saleFactor.Details {
 			customDetails = append(customDetails, models.CustomSaleFactorConfirmationDetail{
-				ID:                       detail.ID,
-				DRowID:                   detail.DRowID,
+				ID: detail.ID,
+				// DRowID:                   detail.DRowID,
 				SaleFactorConfirmationID: detail.SaleFactorConfirmationID,
 				Count:                    detail.Count,
 				UnitCost:                 detail.UnitCost,
@@ -113,8 +113,8 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 			})
 		}
 		customSaleFactorConfirmations = append(customSaleFactorConfirmations, models.CustomSaleFactorConfirmation{
-			ID:               saleFactor.ID,
-			RowID:            saleFactor.RowID,
+			ID: saleFactor.ID,
+			// RowID:            saleFactor.RowID,
 			DateFactorSale:   saleFactor.DateFactorSale,
 			FactorNumber:     saleFactor.FactorNumber,
 			SaleType:         saleFactor.SaleType,

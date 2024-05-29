@@ -3,7 +3,7 @@ package models
 import "time"
 
 type SaleFactorConfirmationDetails struct {
-	DRowID                   string     `json:"drowId"`
+	// DRowID                   string     `json:"drowId"`
 	ID                       int64      `json:"id" gorm:"primaryKey;column:ID"`
 	SaleFactorConfirmationID int64      `json:"saleFactorConfirmationID" gorm:"column:SaleFactorConfirmationID"`
 	Count                    float64    `json:"count" gorm:"column:Count"`
@@ -20,8 +20,8 @@ func (SaleFactorConfirmationDetails) TableName() string {
 }
 
 type SaleFactorConfirmation struct {
-	ID               int64                           `json:"id" gorm:"primaryKey;column:ID"`
-	RowID            string                          `json:"rowId"`
+	ID int64 `json:"id" gorm:"primaryKey;column:ID"`
+	// RowID            string                          `json:"rowId"`
 	DateFactorSale   time.Time                       `json:"dateFactorSale" gorm:"column:DateFactorSale"`
 	FactorNumber     string                          `json:"factorNumber" gorm:"column:FactorNumber"`
 	SaleType         int                             `json:"saleType" gorm:"column:SaleType"`
