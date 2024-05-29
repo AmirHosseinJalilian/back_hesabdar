@@ -2,12 +2,17 @@ package database
 
 import (
 	"fmt"
-
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
 
-func Connect(host, port, user, password, dbName string) (*gorm.DB, error) {
+func Connect(user, password, dbName string) (*gorm.DB, error) {
+
+	const (
+		host = "192.168.1.109"
+		port = "7007"
+	)
+
 	dsn := fmt.Sprintf("sqlserver://%s:%s@%s:%s?database=%s",
 		user, password, host, port, dbName)
 
