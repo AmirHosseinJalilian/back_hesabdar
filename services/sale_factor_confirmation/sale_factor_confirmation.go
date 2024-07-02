@@ -2,12 +2,11 @@ package sale_factor_confirmation
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/AmirHosseinJalilian/back_hesabdar/models"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
+	"net/http"
+	"strconv"
 )
 
 type QuerySaleFactorConfirmationsResponseType struct {
@@ -30,52 +29,63 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
-		limit = 10 // Default limit
+		limit = 10
 	}
 
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
-		offset = 0 // Default offset
+		offset = 0
 	}
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
-		page = 1 // Default page
+		page = 1
 	}
 
-	// Calculate offset based on page and limit
 	if page > 1 {
 		offset = (page - 1) * limit
 	}
 
 	var saleFactorConfirmations []models.SaleFactorConfirmation
+	var totalRows int64
 
+	// Logging the query being executed
 	query := db.Model(&models.SaleFactorConfirmation{}).
 		Preload("Details.Commodity").
 		Preload("PepoleGrouping").
 		Preload("PepoleGrouping.Pepoles").
-		Preload("PepoleGrouping.Pepoles.PepoleDescriptions")
+		Preload("PepoleGrouping.Pepoles.PepoleDescriptions").
+		Preload("SaleFactorTax").
+		Preload("SaleFactorTaxStatus")
 
 	if idStr != "" {
-		id, err := strconv.ParseInt(idStr, 10, 64)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": fmt.Sprintf("Failed to parse id: %v", err),
-			})
+		var id int64
+		if id, err = strconv.ParseInt(idStr, 10, 64); err == nil {
+			query = query.Where("id = ?", id)
+			fmt.Println("Filtering by ID:", id)
 		}
-		query = query.Where("id = ?", id)
 	}
 
-	var totalRows int64
-	query.Count(&totalRows)
-	query = query.Offset(offset).Limit(limit).Find(&saleFactorConfirmations)
-	if query.Error != nil {
+	fmt.Println("Executing query...")
+
+	if err := query.Count(&totalRows).Error; err != nil {
+		fmt.Printf("Failed to count records: %v\n", err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"error": fmt.Sprintf("Failed to execute query: %v", query.Error),
+			"error": fmt.Sprintf("Failed to count records: %v", err),
 		})
 	}
 
-	// Calculate total pages
+	fmt.Printf("Total Rows: %d\n", totalRows)
+
+	if err := query.Offset(offset).Limit(limit).Find(&saleFactorConfirmations).Error; err != nil {
+		fmt.Printf("Failed to retrieve data: %v\n", err)
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"error": fmt.Sprintf("Failed to retrieve data: %v", err),
+		})
+	}
+
+	// fmt.Printf("SaleFactorConfirmations: %+v\n", saleFactorConfirmations)
+
 	totalPages := (int(totalRows) + limit - 1) / limit
 
 	var customSaleFactorConfirmations []models.CustomSaleFactorConfirmation
@@ -83,8 +93,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 		var customDetails []models.CustomSaleFactorConfirmationDetail
 		for _, detail := range saleFactor.Details {
 			customDetails = append(customDetails, models.CustomSaleFactorConfirmationDetail{
-				ID: detail.ID,
-				// DRowID:                   detail.DRowID,
+				ID:                       detail.ID,
 				SaleFactorConfirmationID: detail.SaleFactorConfirmationID,
 				Count:                    detail.Count,
 				UnitCost:                 detail.UnitCost,
@@ -102,8 +111,7 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 			})
 		}
 		customSaleFactorConfirmations = append(customSaleFactorConfirmations, models.CustomSaleFactorConfirmation{
-			ID: saleFactor.ID,
-			// RowID:            saleFactor.RowID,
+			ID:               saleFactor.ID,
 			DateFactorSale:   saleFactor.DateFactorSale,
 			FactorNumber:     saleFactor.FactorNumber,
 			SaleType:         saleFactor.SaleType,
@@ -136,6 +144,20 @@ func GetSaleFactorConfirmations(c echo.Context, db *gorm.DB) error {
 					}
 					return pepoles
 				}(),
+			},
+			SaleFactorTax: models.CustomSaleFactorTax{
+				SaleFactorConfirmationID: saleFactor.SaleFactorTax.SaleFactorConfirmationID,
+				BillType:                 saleFactor.SaleFactorTax.BillType,
+				PostType:                 saleFactor.SaleFactorTax.PostType,
+				CreationDate:             saleFactor.SaleFactorTax.CreationDate,
+				SettlementMethod:         saleFactor.SaleFactorTax.SettlementMethod,
+				CashAmount:               saleFactor.SaleFactorTax.CashAmount,
+				LoanAmount:               saleFactor.SaleFactorTax.LoanAmount,
+			},
+			SaleFactorTaxStatus: models.CustomSaleFactorTaxStatus{
+				SaleFactorConfirmationID: saleFactor.SaleFactorTaxStatus.SaleFactorConfirmationID,
+				Status:                   saleFactor.SaleFactorTaxStatus.Status,
+				StatusDate:               saleFactor.SaleFactorTaxStatus.StatusDate,
 			},
 		})
 	}

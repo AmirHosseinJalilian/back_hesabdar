@@ -7,12 +7,14 @@ import (
 type CustomSaleFactorConfirmation struct {
 	ID int64 `json:"id"`
 	// RowID            string                               `json:"rowId"`
-	DateFactorSale   time.Time                            `json:"dateFactorSale"`
-	FactorNumber     string                               `json:"factorNumber"`
-	SaleType         int                                  `json:"saleType"`
-	PepoleGroupingID int                                  `json:"pepoleGroupingID"`
-	Details          []CustomSaleFactorConfirmationDetail `json:"details"`
-	PepoleGrouping   CustomPepoleGrouping                 `json:"pepoleGrouping"`
+	DateFactorSale      time.Time                            `json:"dateFactorSale"`
+	FactorNumber        string                               `json:"factorNumber"`
+	SaleType            int                                  `json:"saleType"`
+	PepoleGroupingID    int                                  `json:"pepoleGroupingID"`
+	Details             []CustomSaleFactorConfirmationDetail `json:"details"`
+	PepoleGrouping      CustomPepoleGrouping                 `json:"pepoleGrouping"`
+	SaleFactorTax       CustomSaleFactorTax                  `json:"saleFactorTax"`
+	SaleFactorTaxStatus CustomSaleFactorTaxStatus            `json:"saleFactorTaxStatus"`
 }
 
 type CustomSaleFactorConfirmationDetail struct {
@@ -57,4 +59,20 @@ type CustomPepoleDescription struct {
 	Address         string `json:"address"`
 	Phone           string `json:"phone"`
 	NationalityCode string `json:"nationalityCode"`
+}
+
+type CustomSaleFactorTaxStatus struct {
+	SaleFactorConfirmationID int64     `json:"saleFactorConfirmationID"`
+	Status                   uint8     `json:"status"`
+	StatusDate               time.Time `json:"statusDate"`
+}
+
+type CustomSaleFactorTax struct {
+	SaleFactorConfirmationID int64     `json:"saleFactorConfirmationID"`
+	BillType                 bool      `json:"billType"`
+	PostType                 uint8     `json:"postType"`
+	CreationDate             time.Time `json:"creationDate"`
+	SettlementMethod         uint8     `json:"settlementMethod"`
+	CashAmount               float64   `json:"cashAmount"`
+	LoanAmount               float64   `json:"loanAmount"`
 }
